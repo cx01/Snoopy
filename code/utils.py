@@ -45,6 +45,8 @@ def raw_sock_connect(target, port):
     opened = False
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        saddr = socket.inet_aton('192.68.42.63')  # Spoof the source ip address if you want to
+        daddr = socket.inet_aton(target)
         s.settimeout(1)
         s.connect((target, port))
         opened = True
@@ -95,6 +97,14 @@ def full_scan(remote_host):
     return scan, name
 
 
+def dns_name_lookup(domain_name):
+    cmd = "ping -c 1 %s | grep '64 bytes from ' | cut -b 15- >> dom.txt" % domain_name
+    os.system(cmd)
+    domain = swap('dom.txt', True).pop()
+    domain = domain.split('(')[1].split(')')[0].replace(' ', '')
+    return domain
+
+
 def lan_host_enum(timeOut):
     # iface = discover_niface()
     rawSocket = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.htons(0x0003))
@@ -125,18 +135,6 @@ def lan_host_enum(timeOut):
         hsip = socket.inet_ntoa(arp_detailed[6])
         hdmc = binascii.hexlify(arp_detailed[7])
         hdip = socket.inet_ntoa(arp_detailed[8])
-        # print "Dest MAC:        ", dmac
-        # print "Source MAC:      ", smac
-        # print "Type:            ", binascii.hexlify(ethertype)
-        # print "Hardware type:   ", hdwr
-        # print "Protocol type:   ", prot
-        # print "Hardware size:   ", hwsz
-        # print "Protocol size:   ", proz
-        # print "Opcode:          ", opcd
-        # print "Source MAC:      ", hsmc
-        # print "Source IP:       ", hsip
-        # print "Dest MAC:        ", hdmc
-        # print "Dest IP:         ", hdip
         if hsip not in set(hosts):
             print '\033[1m[-] \033[32m%s\033[0m' % hsip
         hosts.append(hsip)
