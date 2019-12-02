@@ -3,7 +3,7 @@ import time
 import os
 
 limit = 25
-os.system('sh security.sh >> badlogins.txt')
+os.system('sh badlogins.sh >> badlogins.txt')
 logindata = utils.swap('badlogins.txt', True)
 for line in logindata:
     data = set(line.split(' '))
