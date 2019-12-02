@@ -39,4 +39,4 @@ def check_logs(limit, drop):
 
 
 blocked_ips, attempt_counts = check_logs(drop_limit=25, doDrop=False)
-print '\033[1mFINISHED\033[35m[%ss Elapsed] ' % str(time.time()-tic)
+print '\033[1mFINISHED\033[35m[%ss Elapsed] \033[0m' % str(time.time()-tic)
