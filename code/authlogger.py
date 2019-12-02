@@ -38,5 +38,5 @@ def check_logs(limit, drop):
     return blocked, data_out
 
 
-blocked_ips, attempt_counts = check_logs(drop_limit=25, doDrop=False)
+blocked_ips, attempt_counts = check_logs(limit=25, drop=False)
 print '\033[1mFINISHED\033[35m[%ss Elapsed] \033[0m' % str(time.time()-tic)
