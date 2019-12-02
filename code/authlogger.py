@@ -11,8 +11,8 @@ for line in logindata:
         data.remove('')
         count = int(data[0])
         addr = data[1]
+        if count >= limit:
+            print '%s has attempted  %d logins ' % (addr, count)
     except:
         pass
-    if count >= limit:
-        print '%s has attempted  %d logins ' % (addr, count)
         # TODO: blacklist ip
