@@ -4,15 +4,15 @@ import os
 
 tic = time.time()
 
+
 def add_drop_rule(addr):
     print '[!!] Dropping all inbound connections from %s' % addr
     drop_cmd = 'iptables -I INPUT -s %s -j DROP' % addr
     os.system(drop_cmd)
 
 
-def check_logs():
+def check_logs(limit, drop):
     data_out = {}
-    limit = 25
     os.system('sh badlogins.sh >> badlogins.txt')
     logindata = utils.swap('badlogins.txt', True)
     blocked = []
@@ -32,10 +32,11 @@ def check_logs():
         if count > limit:
             blocked.append(addr)
             print '* %d Connection Attempts made by %s' % (count, addr)
-            add_drop_rule(addr)
+            if drop:
+                add_drop_rule(addr)
     print '\033[1m Blocking These  \033[31m%d\033[0m\033[1m IP Adresses\033[0m' % len(blocked)
     return blocked, data_out
 
 
-check_logs()
+blocked_ips, attempt_counts = check_logs(drop_limit=25, doDrop=False)
 print '\033[1mFINISHED\033[35m[%ss Elapsed] ' % str(time.time()-tic)
