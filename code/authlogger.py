@@ -2,6 +2,7 @@ import utils
 import time
 import os
 
+tic = time.time()
 
 def add_drop_rule(addr):
     print '[!!] Dropping all inbound connections from %s' % addr
