@@ -17,4 +17,6 @@ for line in logindata:
     else:
         count = int(a)
         addr = b
-    print '%d : %s' % (count, addr)
+    if count > limit:
+        print '* %d Connection Attempts made by %s' % (count, addr)
+print 'Blocking These IP Adresses'
