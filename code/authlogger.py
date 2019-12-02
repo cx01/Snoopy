@@ -13,8 +13,8 @@ for line in logindata:
     b = data.pop()
     if len(a.split('.'))>=3:
         addr = a
-        count = b
+        count = int(b)
     else:
-        count = a
+        count = int(a)
         addr = b
     print '%d : %s' % (count, addr)
