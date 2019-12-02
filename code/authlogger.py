@@ -33,9 +33,9 @@ def check_logs():
             blocked.append(addr)
             print '* %d Connection Attempts made by %s' % (count, addr)
             add_drop_rule(addr)
-    print '\033[1mBlocking These  \033[31m%d\033[0m\033[1m IP Adresses\033[0m' % len(blocked)
+    print '\033[1m Blocking These  \033[31m%d\033[0m\033[1m IP Adresses\033[0m' % len(blocked)
     return blocked, data_out
 
 
 check_logs()
-print '\033[1m\033[32mFINISHED[%ss Elapsed] ' % str(time.time()-tic)
+print '\033[1mFINISHED\033[35m[%ss Elapsed] ' % str(time.time()-tic)
