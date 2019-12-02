@@ -10,12 +10,12 @@ for line in logindata:
     data = set(data)
     data.remove('')
     try:
-        if len(data[0].split('.'))> 2:
-            count = data[1]
-            addr = data[0]
+        if len(list(data)[0].split('.')) > 2:
+            count = list(data)[1]
+            addr = list(data)[0]
         else:
-            count = data[0]
-            addr = data[1]
+            count = list(data)[0]
+            addr = list(data)[1]
 
         if count >= limit:
             print '%s has attempted  %d logins ' % (addr, count)
