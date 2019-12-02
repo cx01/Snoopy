@@ -173,7 +173,7 @@ if 'curious' in sys.argv:
             if scan_data[135] or scan_data[139]:
                 print '\033[1mEXPLOITING SMB \033[31mCVE 2010-2351\033[0m' \
                       '\033[1m Against %s\033[0m' % addr
-                os.system('python smbreak.py %s' % addr)
+                # os.system('python smbreak.py %s' % addr)
         except KeyboardInterrupt:
             pass
 print 'FINISHED [%ss Elapsed]' % str(time.time()-tic)
