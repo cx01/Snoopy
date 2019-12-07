@@ -77,5 +77,7 @@ if 'block' in sys.argv:
 
 
 if 'dump' in sys.argv:
+    file_out = 'unique.txt'
     ip_list, counts = unique_attempts()
+    dump_unique_addrs(file_out, counts)
     print '[*] %d Unique IP Addresses have Attempted SSH Logins as root' % len(ip_list)
