@@ -143,40 +143,40 @@ def lan_host_enum(timeOut):
     return set(hosts), pkts
 
 
-if '-scan' in sys.argv:
-    host = sys.argv[2]
-    print '\033[1mScanning \033[3m\033[35m%s\033[0m' % host
-    if ('-f' or '--fast') not in sys.argv:
-        scan, host_name = full_scan(host)
-    else:
-        scan, host_name,  = quick_scan(host)
-    print host_name
+if __name__ == '__main__':
+    if '-scan' in sys.argv:
+        host = sys.argv[2]
+        print '\033[1mScanning \033[3m\033[35m%s\033[0m' % host
+        if ('-f' or '--fast') not in sys.argv:
+            scan, host_name = full_scan(host)
+        else:
+            scan, host_name, = quick_scan(host)
+        print host_name
 
-if '-lan' in sys.argv:
-    if os.getuid() != 0:
-        print '\033[1m[*] \033[31mYou Must be Root to Run this Option!!\033[0m'
-        exit()
-    unique_ips, packets = lan_host_enum(30)
-    print '\033[31m%d\033[0m Unique IPs Seen\033[0m' % len(unique_ips)
+    if '-lan' in sys.argv:
+        if os.getuid() != 0:
+            print '\033[1m[*] \033[31mYou Must be Root to Run this Option!!\033[0m'
+            exit()
+        unique_ips, packets = lan_host_enum(30)
+        print '\033[31m%d\033[0m Unique IPs Seen\033[0m' % len(unique_ips)
 
-if 'curious' in sys.argv:
-    unique_ips, packets = lan_host_enum(15)
-    print '\033[31m%d\033[0m Unique IPs Seen\033[0m' % len(unique_ips)
-    for addr in unique_ips:
-        print '\033[1m== \033[34mScanning %s\033[0m\033[1m ==\033[0m' % addr
-        try:
-            scan_data, host_name = quick_scan(addr)
-            if host_name != '':
-                print '\033[1m== Finished Scanning \033[33m%s\033[0m\033[1m ==\033[0m' % host_name
-            else:
-                print '\033[1m== Finished Scanning %s ==\033[0m' % addr
-            if scan_data[135] or scan_data[139]:
-                print '\033[1mEXPLOITING SMB \033[31mCVE 2010-2351\033[0m' \
-                      '\033[1m Against %s\033[0m' % addr
-                # os.system('python smbreak.py %s' % addr)
-        except KeyboardInterrupt:
-            pass
-print 'FINISHED [%ss Elapsed]' % str(time.time()-tic)
+    if 'curious' in sys.argv:
+        unique_ips, packets = lan_host_enum(15)
+        print '\033[31m%d\033[0m Unique IPs Seen\033[0m' % len(unique_ips)
+        for addr in unique_ips:
+            print '\033[1m== \033[34mScanning %s\033[0m\033[1m ==\033[0m' % addr
+            try:
+                scan_data, host_name = quick_scan(addr)
+                if host_name != '':
+                    print '\033[1m== Finished Scanning \033[33m%s\033[0m\033[1m ==\033[0m' % host_name
+                else:
+                    print '\033[1m== Finished Scanning %s ==\033[0m' % addr
+                if scan_data[135] or scan_data[139]:
+                    print '\033[1mFound Service\033[31mSMB\033[0m'
+
+            except KeyboardInterrupt:
+                pass
+    print 'FINISHED [%ss Elapsed]' % str(time.time() - tic)
 
 
 
