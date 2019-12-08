@@ -1,9 +1,17 @@
-import utils
 import time
 import sys
 import os
 
 tic = time.time()
+
+
+def swap(file_name, destroy):
+    data = []
+    for line in open(file_name, 'r').readlines():
+        data.append(line.replace('\n', ''))
+    if destroy:
+        os.remove(file_name)
+    return data
 
 
 def add_drop_rule(addr):
@@ -15,7 +23,7 @@ def add_drop_rule(addr):
 def check_logs(limit, drop):
     data_out = {}
     os.system('sh badlogins.sh >> badlogins.txt')
-    logindata = utils.swap('badlogins.txt', True)
+    logindata = swap('badlogins.txt', True)
     blocked = []
     for line in logindata:
         data = set(line.split(' '))
@@ -43,7 +51,7 @@ def unique_attempts():
     seen = []
     counts = {}
     os.system('sh badlogins.sh >> jerks.txt')
-    for line in utils.swap('jerks.txt', True):
+    for line in swap('jerks.txt', True):
         data = set(line.split(' '))
         data.pop()
         a = data.pop()
@@ -77,7 +85,7 @@ if 'block' in sys.argv:
 
 
 if 'dump' in sys.argv:
-    file_out = 'unique.txt'
+    data_out = 'unique.txt'
     ip_list, counts = unique_attempts()
-    dump_unique_addrs(file_out, counts)
+    dump_unique_addrs(data_out, counts)
     print '[*] %d Unique IP Addresses have Attempted SSH Logins as root' % len(ip_list)
