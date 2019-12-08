@@ -19,4 +19,4 @@ accumulated for machines that have attempted many times to login. It is amazing 
 machines are continuously trying to do this, and even more interesting to see where they 
 are located. 
 
-![SSH_Attempts](https://raw.githubusercontent.com/scott-robbins/Snoopy/master/OSINT/jerks.png)
+![SSH_Attempts](https://raw.githubusercontent.com/scott-robbins/Snoopy/master/code/OSINT/jerks.png)
