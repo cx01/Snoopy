@@ -94,7 +94,7 @@ def retrieve_unauthorized_origins():
         exit()
     print '=== FINISHED Retrieving %d IP Locations [%ss Elapsed] ===' % \
           (unique, str(time.time() - tic))
-    return countries, counts
+    return countries, counts, country_codes
 
 
 def compute_stats(counts):
@@ -102,7 +102,7 @@ def compute_stats(counts):
     total = np.array(counts.values()).sum()
     for country in country_counts.keys():
         if country_counts[country] > 0:
-            percents[country] = 100 * country_counts[country] / total
+            percents[country] = np.round((100 * country_counts[country]) / total)
     return percents
 
 
@@ -110,13 +110,40 @@ unique_ips, login_attempts = pull_rogue_ip_list()
 if not os.path.isfile('locales.txt') or 'update_locations' in sys.argv:
     ip_origins, country_counts, unknown = determine_login_locales(unique_ips)
 else:
-    ip_origins, country_counts = retrieve_unauthorized_origins()
-    ip_percentiles = compute_stats(country_counts)
+    ip_origins, country_counts, codes = retrieve_unauthorized_origins()
+ip_percentiles = compute_stats(country_counts)
+print '[*] %d Countries Identified' % len(country_counts.keys())
 
-    # font = {'family': 'Times',
-    #         'weight': 'normal',
-    #         'size': 5}
-    # plt.figure(figsize=(12, 12))
-    # plt.rc('font', **font)
-    # plt.pie(ip_percentiles.values(), autopct='%1.1f%%', labels=ip_percentiles.keys())
-    # plt.show()
+
+if 'plot' in sys.argv:
+    f, ax = plt.subplots()
+    ii = 0
+    included = []
+    for pct in ip_percentiles.values():
+        if pct > 1:
+            place = ip_percentiles.keys()[ii]
+            plt.bar(ii, pct, label=place)
+            included.append(place)
+        ii += 1
+    plt.title('Unauthorized SSH Attempts by Country')
+    plt.ylabel('% of  Unauthorized Login Attempts')
+    plt.legend(included)
+    # plt.setp(included, rotation=40, ha="right")
+    plt.show()
+
+if 'target' in sys.argv and len(sys.argv) > 2:
+    coi = sys.argv[2].upper()
+    if coi not in (country_counts.keys() or codes.keys()):
+        print 'Unknown Country: %s' % coi
+        exit()
+
+    if coi in country_counts.keys():
+        location = coi
+    elif coi in codes.keys():
+        location = codes[coi]
+    targets = []
+    for address in ip_origins:
+        if ip_origins[address] == location:
+            targets.append(address)
+    print '%d Targets Acquired from %s' % (len(targets), location)
+
