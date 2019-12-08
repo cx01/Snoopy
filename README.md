@@ -1,5 +1,6 @@
 # Snoopy 
-A simple LAN network scanner written in python.
+This project is my first foray into experimenting with security on the public internet. Some of 
+these tools will have a Blue Team feel, and others might have a Red Team feel.
 
 ## Installation
 Install the repository with `git clone https://github.com/scott-robbins/Snoopy`
