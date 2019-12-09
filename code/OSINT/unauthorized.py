@@ -31,7 +31,7 @@ def pull_rogue_ip_list():
 
 def load_countries():
     codes = {}
-    for line in swap('countrycodes.txt', False):
+    for line in swap('../countrycodes.txt', False):
         country_name = line.split(';')[0]
         country_code = line.split(';')[1]
         codes[country_code] = country_name
@@ -131,19 +131,4 @@ if 'plot' in sys.argv:
     # plt.setp(included, rotation=40, ha="right")
     plt.show()
 
-if 'target' in sys.argv and len(sys.argv) > 2:
-    coi = sys.argv[2].upper()
-    if coi not in (country_counts.keys() or codes.keys()):
-        print 'Unknown Country: %s' % coi
-        exit()
-
-    if coi in country_counts.keys():
-        location = coi
-    elif coi in codes.keys():
-        location = codes[coi]
-    targets = []
-    for address in ip_origins:
-        if ip_origins[address] == location:
-            targets.append(address)
-    print '%d Targets Acquired from %s' % (len(targets), location)
 
