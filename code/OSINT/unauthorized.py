@@ -103,7 +103,7 @@ def retrieve_unauthorized_origins():
 
 def compute_stats(counts):
     percents = {}
-    total = np.array(counts.values()).sum()
+    total = sum(counts.values())
     for country in country_counts.keys():
         if country_counts[country] > 0:
             percents[country] = np.round((100 * country_counts[country]) / total)
