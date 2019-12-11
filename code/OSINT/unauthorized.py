@@ -1,5 +1,9 @@
-import matplotlib.pyplot as plt
-import numpy as np
+try:
+    import matplotlib.pyplot as plt
+    import numpy as np
+except ImportError:
+    print '[!!] Running Without Matplotlib or NumPy'
+    pass
 import random
 import time
 import sys
