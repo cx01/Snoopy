@@ -227,12 +227,12 @@ def spray(ip_locations, country_codes, intense):
 
 
 if __name__ == '__main__':
-    brute_force = True
-    rogue_ips, login_attempts = pull_rogue_ip_list()
-    ip_loc, c_counts, c_codes = retrieve_unauthorized_origins()
-
+    brute_force = False
     if '!!' in sys.argv:
         brute_force = True
+
+    rogue_ips, login_attempts = pull_rogue_ip_list()
+    ip_loc, c_counts, c_codes = retrieve_unauthorized_origins()
 
     if 'light' or '-l' in sys.argv:
         brute_force = False
