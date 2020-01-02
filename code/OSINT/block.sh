@@ -2,7 +2,7 @@
 
 if [ $# != 1 ]; then
     echo 'Incorrect Usage!'
-    echo '$ ./close_port <port> '
+    echo '$ block <address> '
     exit
 fi
 
