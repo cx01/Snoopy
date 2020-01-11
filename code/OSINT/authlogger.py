@@ -80,7 +80,7 @@ if 'block' in sys.argv:
     limit = 25
     if '-limit' in sys.argv:
         limit = int(sys.argv[4])
-    blocked_ips, attempt_counts = check_logs(limit=25, drop=True)
+    blocked_ips, attempt_counts = check_logs(limit=15, drop=True)
     print '\033[1mFINISHED\033[32m [%ss Elapsed] \033[0m' % str(time.time() - tic)
 
 
