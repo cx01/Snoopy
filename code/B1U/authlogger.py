@@ -50,7 +50,7 @@ def check_logs(limit, drop):
 def unique_attempts():
     seen = []
     counts = {}
-    os.system('sh badlogins.sh >> jerks.txt')
+    os.system('sh blocklist.sh >> jerks.txt')
     for line in swap('jerks.txt', True):
         data = set(line.split(' '))
         data.pop()
@@ -75,7 +75,7 @@ def dump_unique_addrs(file_out, ip_counts):
     open(file_out, 'w').write(data)
     return True
 
-
+# This is a maintenance option
 if 'block' in sys.argv:
     limit = 25
     if '-limit' in sys.argv:
