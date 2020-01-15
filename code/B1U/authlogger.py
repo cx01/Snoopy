@@ -22,7 +22,7 @@ def add_drop_rule(addr):
 
 def check_logs(limit, drop):
     data_out = {}
-    os.system('sh badlogins.sh >> badlogins.txt')
+    os.system('sh blocklist.sh >> badlogins.txt')
     logindata = swap('badlogins.txt', True)
     blocked = []
     for line in logindata:
