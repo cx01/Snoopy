@@ -31,9 +31,14 @@ def cmd(command):
 def pull_rogue_ip_list():
     counter = {}
     for line in swap('unique.txt', False):
-        ip = line.split(' : ')[0]
-        login_attempts = line.split(' : ')[1]
-        counter[ip] = int(login_attempts)
+        try:
+            ip = list(set(line.split(' '))).pop()
+            login_attempts = int(list(set(line.split(' '))).pop(1))
+        except ValueError:
+            ip =  list(set(line.split(' '))).pop(1)
+            login_attempts = list(set(line.split(' '))).pop()
+
+        counter[ip] = login_attempts
     return list(set(counter.keys())), counter
 
 
@@ -115,7 +120,7 @@ def compute_stats(counts):
 
 
 unique_ips, login_attempts = pull_rogue_ip_list()
-if not os.path.isfile('locales.txt') or 'update_locations' in sys.argv:
+if not os.path.isfile('../locales.txt') or 'update_locations' in sys.argv:
     ip_origins, country_counts, unknown = determine_login_locales(unique_ips)
 else:
     ip_origins, country_counts, codes = retrieve_unauthorized_origins()

