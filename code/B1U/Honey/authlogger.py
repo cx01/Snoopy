@@ -39,11 +39,11 @@ def check_logs(limit, drop):
             	pass
   
         else:
-        	try:
-            	count = int(a)
-            	addr = b
+            try:
+                count = int(a)
+                addr = b
            	except ValueError:
-           		pass
+           	    pass
         data_out[addr] = count
         if count > limit:
             blocked.append(addr)
