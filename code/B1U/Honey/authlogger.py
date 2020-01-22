@@ -51,7 +51,7 @@ def unique_attempts():
     seen = []
     counts = {}
     os.system('sh blocklist.sh >> jerks.txt')
-    for line in swap('jerks.txt', True):
+    for line in swap('log.txt', True):
         data = set(line.split(' '))
         data.pop()
         a = data.pop()
