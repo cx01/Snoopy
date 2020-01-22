@@ -32,11 +32,18 @@ def check_logs(limit, drop):
         a = data.pop()
         b = data.pop()
         if len(a.split('.')) >= 3:
-            addr = a
-            count = int(b)
+            try:
+	            addr = a
+  	            count = int(b)
+            except ValueError:
+            	pass
+  
         else:
-            count = int(a)
-            addr = b
+        	try:
+            	count = int(a)
+            	addr = b
+           	except ValueError:
+           		pass
         data_out[addr] = count
         if count > limit:
             blocked.append(addr)
