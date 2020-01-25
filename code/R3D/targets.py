@@ -259,3 +259,10 @@ if __name__ == '__main__':
 
     if 'test' in sys.argv:
         blunt_force_attack('10.0.0.5', True)
+
+    if 'hit' in sys.argv and len(sys.argv) >= 3:
+        blunt_force_attack(sys.argv[2], 500)
+    elif 'hit' in sys.argv and '-n' in sys.argv and len(sys.argv) >= 4:
+        addr = sys.argv[2]
+        size = int(sys.argv[3])
+        blunt_force_attack(addr, size)
