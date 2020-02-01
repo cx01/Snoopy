@@ -22,8 +22,8 @@ def add_drop_rule(addr):
 
 def check_logs(limit, drop):
     data_out = {}
-    os.system('sh blocklist.sh >> badlogins.txt')
-    logindata = swap('badlogins.txt', True)
+    os.system('sh blocklist.sh')
+    logindata = swap('log.txt', False)
     blocked = []
     for line in logindata:
         data = set(line.split(' '))
@@ -35,16 +35,16 @@ def check_logs(limit, drop):
             try:
                 addr = a
                 count = int(b)
+                data_out[addr] = count
             except ValueError:
-                pass
-  
+                continue 
         else:
             try:
                 count = int(a)
                 addr = b
+                data_out[addr] = count
             except ValueError:
-                pass
-        data_out[addr] = count
+                continue 
         if count > limit:
             blocked.append(addr)
             print '* %d Connection Attempts made by %s' % (count, addr)
@@ -57,8 +57,8 @@ def check_logs(limit, drop):
 def unique_attempts():
     seen = []
     counts = {}
-    os.system('sh blocklist.sh >> jerks.txt')
-    for line in swap('log.txt', True):
+    os.system('sh blocklist.sh')
+    for line in swap('log.txt', False):
         data = set(line.split(' '))
         data.pop()
         a = data.pop()
